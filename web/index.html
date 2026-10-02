@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="hud" class="hidden">
+        <!-- money -->
+        <div id="money">
+            <div class="money-row" id="cash"><i class="fa-solid fa-money-bill-wave"></i><span>$0</span></div>
+            <div class="money-row" id="bank"><i class="fa-solid fa-building-columns"></i><span>$0</span></div>
+            <div id="money-change"></div>
+        </div>
+
+        <!-- bottom-left: location + status -->
+        <div id="left">
+            <div id="location">
+                <div class="compass" id="compass">N</div>
+                <div class="loc-text">
+                    <strong id="street"></strong>
+                    <span id="zone"></span>
+                </div>
+            </div>
+            <div id="status"></div>
+        </div>
+
+        <!-- bottom-right: vehicle -->
+        <div id="vehicle" class="hidden">
+            <svg class="gauge" viewBox="0 0 200 200">
+                <path class="g-track" d="M 34 150 A 80 80 0 1 1 166 150"/>
+                <path class="g-rpm" id="rpm" d="M 34 150 A 80 80 0 1 1 166 150"/>
+            </svg>
+            <div class="speed">
+                <strong id="speed">0</strong>
+                <span id="unit">MPH</span>
+            </div>
+            <div class="v-info">
+                <span class="gear" id="gear">N</span>
+                <span id="belt" class="belt"><i class="fa-solid fa-user-slash"></i></span>
+                <span id="engine" class="engine"><i class="fa-solid fa-oil-can"></i></span>
+            </div>
+            <div class="fuel">
+                <i class="fa-solid fa-gas-pump"></i>
+                <div class="fuel-track"><div class="fuel-fill" id="fuel"></div></div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
