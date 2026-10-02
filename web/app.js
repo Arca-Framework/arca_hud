@@ -51,6 +51,8 @@ function updateStatus(d) {
 const RPM_LEN = 419;
 function updateVehicle(d) {
     $('left').classList.toggle('map', !!d.map);
+    mapVisible = !!d.map;
+    syncFrame();
     $('vehicle').classList.toggle('hidden', !d.show);
     if (!d.show) return;
 
@@ -107,6 +109,25 @@ function updateMoney(d) {
     }
 }
 
+/* ---------- minimap frame ---------- */
+let mapVisible = false;
+let frameStyle = 'frame';
+function updateMinimap(d) {
+    const a = d.anchor;
+    frameStyle = d.style || 'frame';
+    const f = $('minimap-frame');
+    f.style.left = `${a.left * 100}vw`;
+    f.style.top = `${a.top * 100}vh`;
+    f.style.width = `${a.width * 100}vw`;
+    f.style.height = `${a.height * 100}vh`;
+    // status block sits just right of the radar
+    document.documentElement.style.setProperty('--map-right', `${(a.left + a.width) * 100}vw`);
+    syncFrame();
+}
+function syncFrame() {
+    $('minimap-frame').classList.toggle('hidden', !mapVisible || frameStyle === 'none');
+}
+
 /* ---------- router ---------- */
 window.addEventListener('message', ({ data }) => {
     switch (data.action) {
@@ -115,6 +136,7 @@ window.addEventListener('message', ({ data }) => {
         case 'vehicle': updateVehicle(data.data); break;
         case 'location': updateLocation(data.data); break;
         case 'money': updateMoney(data.data); break;
+        case 'minimap': updateMinimap(data.data); break;
     }
 });
 

@@ -82,3 +82,18 @@ body { font-family: 'Inter', 'Segoe UI', sans-serif; color: var(--text); overflo
 .fuel-fill.low { background: #ff5468; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+/* ---------- minimap frame ---------- */
+/* positioned from the radar's real screen rect sent by client/minimap.lua */
+#minimap-frame {
+    position: absolute; pointer-events: none;
+    border-radius: 10px;
+    outline: 2px solid rgba(0, 255, 106, .55);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px rgba(10, 14, 14, .55), 0 0 22px rgba(0, 255, 106, .25), inset 0 0 18px rgba(0, 0, 0, .45);
+    transition: opacity .3s;
+}
+#minimap-frame .mm-glow {
+    position: absolute; left: 12%; right: 12%; top: -5px; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, #00ff6a, transparent);
+}

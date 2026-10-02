@@ -8,7 +8,10 @@ description 'Player HUD for the Arca framework'
 version '0.1.0'
 
 shared_script 'config.lua'
-client_script 'client/main.lua'
+client_scripts {
+    'client/main.lua',
+    'client/minimap.lua',
+}
 
 ui_page 'web/index.html'
 
