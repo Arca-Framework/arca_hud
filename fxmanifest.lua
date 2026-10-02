@@ -9,6 +9,7 @@ version '0.1.0'
 
 shared_script 'config.lua'
 client_scripts {
+    'client/settings.lua',
     'client/main.lua',
     'client/minimap.lua',
 }

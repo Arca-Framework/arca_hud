@@ -52,6 +52,57 @@
             </div>
         </div>
     </div>
+    <!-- cinematic bars -->
+    <div id="cine" class="hidden"><span class="bar top"></span><span class="bar bottom"></span></div>
+
+    <!-- /hud settings menu -->
+    <div id="menu" class="hidden">
+        <div class="menu-card">
+            <header class="menu-head">
+                <div><span>Arca</span><h2>HUD Settings</h2></div>
+                <button class="icon" data-action="close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+
+            <div class="menu-body">
+                <section>
+                    <h3><i class="fa-solid fa-sliders"></i> General</h3>
+                    <label class="row"><span>Show HUD</span><input type="checkbox" class="toggle" data-key="visible"></label>
+                    <label class="row"><span>Cinematic mode <em>hides everything and adds black bars</em></span><input type="checkbox" class="toggle" data-key="cinematic"></label>
+                    <label class="row col"><span>HUD size <b id="scale-val">100%</b></span><input type="range" min="70" max="130" step="5" data-key="scale"></label>
+                </section>
+
+                <section>
+                    <h3><i class="fa-solid fa-heart-pulse"></i> Status</h3>
+                    <div class="chips" id="ring-chips"></div>
+                </section>
+
+                <section>
+                    <h3><i class="fa-solid fa-car"></i> Vehicle</h3>
+                    <div class="row"><span>Speed unit</span><div class="seg" data-key="speedUnit"><button data-value="mph">MPH</button><button data-value="kmh">KM/H</button></div></div>
+                </section>
+
+                <section>
+                    <h3><i class="fa-solid fa-map"></i> Minimap</h3>
+                    <label class="row"><span>Show on foot</span><input type="checkbox" class="toggle" data-key="minimapOnFoot"></label>
+                    <label class="row"><span>Arca frame</span><input type="checkbox" class="toggle" data-key="minimapFrame"></label>
+                    <label class="row col"><span>Zoom <b id="zoom-val">1100</b></span><input type="range" min="0" max="1400" step="50" data-key="minimapZoom"></label>
+                </section>
+
+                <section>
+                    <h3><i class="fa-solid fa-circle-info"></i> Info</h3>
+                    <label class="row"><span>Street &amp; compass</span><input type="checkbox" class="toggle" data-key="location"></label>
+                    <label class="row"><span>Stress</span><input type="checkbox" class="toggle" data-key="stress"></label>
+                    <div class="row"><span>Money</span><div class="seg" data-key="money"><button data-value="always">Always</button><button data-value="change">On change</button><button data-value="never">Never</button></div></div>
+                </section>
+            </div>
+
+            <footer class="menu-foot">
+                <button class="btn ghost" data-action="reset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                <button class="btn primary" data-action="close">Done</button>
+            </footer>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

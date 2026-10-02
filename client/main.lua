@@ -1,5 +1,4 @@
 local PlayerData = exports.arca_core:GetPlayerData() or {}
-local visible = true      -- toggled by /hud
 local seatbelt = false
 local last = {}           -- last values sent per message, to skip duplicates
 
@@ -21,7 +20,7 @@ local function sendMoney(change)
     local money = PlayerData.money or {}
     SendNUIMessage({
         action = 'money',
-        data = { cash = money.cash or 0, bank = money.bank or 0, mode = HudConfig.ShowMoney, change = change },
+        data = { cash = money.cash or 0, bank = money.bank or 0, mode = HudSettings.money, change = change },
     })
 end
 
@@ -86,7 +85,7 @@ end
 ---------------------------------------------------------------------
 CreateThread(function()
     while true do
-        local show = visible and isLoggedIn() and not IsPauseMenuActive()
+        local show = HudSettings.visible and not HudSettings.cinematic and isLoggedIn() and not IsPauseMenuActive()
         send('visible', show)
 
         if show then
@@ -100,21 +99,21 @@ CreateThread(function()
                 armor = GetPedArmour(ped),
                 hunger = math.floor(meta.hunger or 100),
                 thirst = math.floor(meta.thirst or 100),
-                stress = HudConfig.ShowStress and math.floor(meta.stress or 0) or nil,
+                stress = HudSettings.stress and math.floor(meta.stress or 0) or nil,
                 oxygen = IsPedSwimmingUnderWater(ped) and math.floor(GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10) or nil,
                 talking = NetworkIsPlayerTalking(PlayerId()),
                 voice = voiceMode(),
                 radio = LocalPlayer.state.radioChannel,
             })
 
-            DisplayRadar(inVeh or HudConfig.MinimapOnFoot)
+            DisplayRadar(inVeh or HudSettings.minimapOnFoot)
 
             if inVeh then
-                local mult = HudConfig.SpeedUnit == 'kmh' and 3.6 or 2.236936
+                local mult = HudSettings.speedUnit == 'kmh' and 3.6 or 2.236936
                 send('vehicle', {
                     show = true,
                     speed = math.floor(GetEntitySpeed(veh) * mult),
-                    unit = HudConfig.SpeedUnit,
+                    unit = HudSettings.speedUnit,
                     rpm = math.floor(GetVehicleCurrentRpm(veh) * 100),
                     gear = GetVehicleCurrentGear(veh),
                     fuel = fuelLevel(veh),
@@ -123,10 +122,10 @@ CreateThread(function()
                     map = true,
                 })
             else
-                send('vehicle', { show = false, map = HudConfig.MinimapOnFoot })
+                send('vehicle', { show = false, map = HudSettings.minimapOnFoot })
             end
 
-            if HudConfig.ShowLocation then
+            if HudSettings.location then
                 local c = GetEntityCoords(ped)
                 local s1, s2 = GetStreetNameAtCoord(c.x, c.y, c.z)
                 send('location', {
@@ -136,6 +135,8 @@ CreateThread(function()
                     heading = heading(),
                 })
             end
+        elseif isLoggedIn() and (HudSettings.cinematic or not HudSettings.visible) then
+            DisplayRadar(false)
         end
 
         Wait(HudConfig.UpdateInterval)
@@ -157,13 +158,10 @@ end)
 ---------------------------------------------------------------------
 -- Commands / exports
 ---------------------------------------------------------------------
-RegisterCommand('hud', function()
-    visible = not visible
-    exports.arca_core:Notify(visible and 'HUD shown' or 'HUD hidden')
-end, false)
-
+-- /hud (the settings menu) lives in client/settings.lua
 exports('ToggleHud', function(state)
-    if state == nil then visible = not visible else visible = state end
+    if state == nil then HudSettings.visible = not HudSettings.visible else HudSettings.visible = state end
+    SyncHudSettings()
 end)
 
 -- if the resource restarts mid-session

@@ -1,5 +1,11 @@
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => '$' + Math.round(n || 0).toLocaleString('en-US');
+const resource = typeof GetParentResourceName === 'function' ? GetParentResourceName() : 'arca_hud';
+const post = (name, data = {}) => fetch(`https://${resource}/${name}`, { method: 'POST', body: JSON.stringify(data) }).catch(() => {});
+
+let settings = { rings: {} };
+let lastStatus = null;
+let lastMoney = null;
 
 /* ---------- status rings ---------- */
 const RINGS = [
@@ -28,7 +34,8 @@ function setRing(key, value) {
     const ring = rings[key];
     const cfg = ring.cfg;
     const missing = value === undefined || value === null;
-    const gone = (cfg.hideWhenMissing && missing) || (cfg.hideAtZero && !missing && value <= 0) || (missing && !cfg.voice);
+    const disabled = settings.rings[key] === false;
+    const gone = disabled || (cfg.hideWhenMissing && missing) || (cfg.hideAtZero && !missing && value <= 0) || (missing && !cfg.voice);
     ring.el.classList.toggle('gone', gone);
     if (missing) return;
     const v = Math.max(0, Math.min(100, value));
@@ -38,6 +45,7 @@ function setRing(key, value) {
 }
 
 function updateStatus(d) {
+    lastStatus = d;
     ['health', 'armor', 'hunger', 'thirst', 'stress', 'oxygen'].forEach((k) => setRing(k, d[k]));
 
     // voice: ring shows range (1-3), icon lights up while talking
@@ -86,6 +94,8 @@ function updateLocation(d) {
 /* ---------- money ---------- */
 let moneyTimer;
 function updateMoney(d) {
+    lastMoney = d;
+    if (settings.money) d.mode = settings.money;
     const box = $('money');
     $('cash').querySelector('span').textContent = fmt(d.cash);
     $('bank').querySelector('span').textContent = fmt(d.bank);
@@ -148,4 +158,82 @@ if (location.search.includes('preview')) {
     window.postMessage({ action: 'vehicle', data: { show: true, map: true, speed: 87, unit: 'mph', rpm: 72, gear: 4, fuel: 46, engine: 92, seatbelt: true } });
     window.postMessage({ action: 'location', data: { street: 'Vinewood Blvd', cross: 'Power St', zone: 'Downtown Vinewood', heading: 'NE' } });
     window.postMessage({ action: 'money', data: { cash: 2450, bank: 18900, mode: 'always', change: { type: 'cash', amount: 250 } } });
+}
+
+/* ---------- settings (from /hud) ---------- */
+function applySettings(s) {
+    settings = s;
+    document.documentElement.style.setProperty('--s', (s.scale || 100) / 100);
+    $('cine').classList.toggle('hidden', !s.cinematic);
+    if (lastStatus) updateStatus(lastStatus);
+    if (lastMoney) updateMoney({ ...lastMoney, change: null });
+    if (!$('menu').classList.contains('hidden')) fillMenu();
+}
+
+/* ---------- /hud menu ---------- */
+const menu = $('menu');
+const RING_LABELS = { health: 'Health', armor: 'Armor', hunger: 'Hunger', thirst: 'Thirst', stress: 'Stress', voice: 'Voice' };
+
+function fillMenu() {
+    menu.querySelectorAll('.toggle').forEach((t) => (t.checked = !!settings[t.dataset.key]));
+    menu.querySelectorAll('input[type=range]').forEach((r) => (r.value = settings[r.dataset.key]));
+    menu.querySelectorAll('.seg').forEach((seg) => {
+        seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.value === settings[seg.dataset.key]));
+    });
+    $('scale-val').textContent = `${settings.scale}%`;
+    $('zoom-val').textContent = settings.minimapZoom;
+
+    const chips = $('ring-chips');
+    chips.innerHTML = '';
+    Object.keys(RING_LABELS).forEach((name) => {
+        const cfg = RINGS.find((r) => r.key === name);
+        const on = settings.rings[name] !== false;
+        const chip = document.createElement('button');
+        chip.className = 'chip' + (on ? ' on' : '');
+        chip.style.setProperty('--c', cfg.color);
+        chip.innerHTML = `<i class="fa-solid ${cfg.icon}"></i>${RING_LABELS[name]}`;
+        chip.addEventListener('click', () => post('settings:update', { key: 'ring', value: { name, enabled: !on } }));
+        chips.appendChild(chip);
+    });
+}
+
+menu.querySelectorAll('.toggle').forEach((t) =>
+    t.addEventListener('change', () => post('settings:update', { key: t.dataset.key, value: t.checked })));
+
+menu.querySelectorAll('input[type=range]').forEach((r) => {
+    r.addEventListener('input', () => {
+        if (r.dataset.key === 'scale') {
+            $('scale-val').textContent = `${r.value}%`;
+            document.documentElement.style.setProperty('--s', r.value / 100); // live preview while dragging
+        } else {
+            $('zoom-val').textContent = r.value;
+        }
+    });
+    r.addEventListener('change', () => post('settings:update', { key: r.dataset.key, value: Number(r.value) }));
+});
+
+menu.querySelectorAll('.seg').forEach((seg) =>
+    seg.querySelectorAll('button').forEach((b) =>
+        b.addEventListener('click', () => post('settings:update', { key: seg.dataset.key, value: b.dataset.value }))));
+
+menu.querySelectorAll('[data-action]').forEach((b) =>
+    b.addEventListener('click', () => post(b.dataset.action === 'reset' ? 'settings:reset' : 'settings:close')));
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.classList.contains('hidden')) post('settings:close');
+});
+
+window.addEventListener('message', ({ data }) => {
+    if (data.action === 'settings') applySettings(data.data);
+    if (data.action === 'menu') {
+        menu.classList.toggle('hidden', !data.data.open);
+        if (data.data.open) {
+            settings = data.data.settings;
+            fillMenu();
+        }
+    }
+});
+
+if (location.search.includes('menu')) {
+    window.postMessage({ action: 'menu', data: { open: true, settings: { visible: true, cinematic: false, scale: 100, speedUnit: 'mph', minimapOnFoot: false, minimapFrame: true, minimapZoom: 1100, location: true, stress: true, money: 'change', rings: { health: true, armor: true, hunger: true, thirst: true, stress: false, voice: true } } } });
 }

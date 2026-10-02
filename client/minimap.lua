@@ -32,7 +32,6 @@ CreateThread(function()
     while not LocalPlayer.state.isLoggedIn do Wait(500) end
 
     local minimap = hideHealthArmour()
-    SetRadarZoom(HudConfig.Minimap.Zoom)
 
     local lastAnchor
     local nextAnchor = 0
@@ -48,12 +47,13 @@ CreateThread(function()
 
         local now = GetGameTimer()
         if now >= nextAnchor then
-            nextAnchor = now + 2000
+            nextAnchor = now + 500
             local anchor = getMinimapAnchor()
-            local key = ('%.4f:%.4f:%.4f:%.4f'):format(anchor.left, anchor.top, anchor.width, anchor.height)
+            local key = ('%.4f:%.4f:%.4f:%.4f:%s:%d'):format(anchor.left, anchor.top, anchor.width, anchor.height, tostring(HudSettings.minimapFrame), HudSettings.minimapZoom)
             if key ~= lastAnchor then
                 lastAnchor = key
-                SendNUIMessage({ action = 'minimap', data = { anchor = anchor, style = HudConfig.Minimap.Style } })
+                SetRadarZoom(HudSettings.minimapZoom)
+                SendNUIMessage({ action = 'minimap', data = { anchor = anchor, style = HudSettings.minimapFrame and 'frame' or 'none' } })
             end
         end
 
