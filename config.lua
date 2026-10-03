@@ -17,7 +17,7 @@ HudConfig = {
         WEAPON_ICON = true,             -- 2  weapon + ammo in the top-right
         CASH = true,                    -- 3  single-player cash
         MP_CASH = true,                 -- 4  online cash
-        MP_MESSAGE = false,             -- 5  online messages
+        MP_MESSAGE = true,             -- 5  online messages
         VEHICLE_NAME = true,            -- 6  vehicle name when entering a car
         AREA_NAME = true,               -- 7  area name (Arca shows this)
         VEHICLE_CLASS = true,           -- 8  vehicle class
@@ -26,14 +26,14 @@ HudConfig = {
         FLOATING_HELP_TEXT_1 = false,   -- 11 floating help text
         FLOATING_HELP_TEXT_2 = false,   -- 12 floating help text
         CASH_CHANGE = true,             -- 13 +$/-$ popups (Arca shows this)
-        RETICLE = false,                -- 14 aiming dot / crosshair
+        RETICLE = true,                -- 14 aiming dot / crosshair
         SUBTITLE_TEXT = false,          -- 15 subtitles
         RADIO_STATIONS = false,         -- 16 radio station wheel
         SAVING_GAME = true,             -- 17 saving spinner
         GAME_STREAM = false,            -- 18 loading / feed messages
-        WEAPON_WHEEL = false,           -- 19 weapon wheel (true blocks it entirely)
+        WEAPON_WHEEL = true,           -- 19 weapon wheel (true blocks it entirely)
         WEAPON_WHEEL_STATS = true,      -- 20 weapon stats on the wheel
         HUD_COMPONENTS = false,         -- 21 all of the above at once
-        HUD_WEAPONS = false,            -- 22 weapon HUD group
+        HUD_WEAPONS = true,            -- 22 weapon HUD group
     },
 }

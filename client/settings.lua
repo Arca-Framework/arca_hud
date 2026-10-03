@@ -53,12 +53,15 @@ local function openMenu()
     menuOpen = true
     SendNUIMessage({ action = 'menu', data = { open = true, settings = HudSettings, defaults = defaults } })
     SetNuiFocus(true, true)
+    -- real game blur behind the menu (CSS backdrop-filter doesn't work in FiveM's NUI)
+    TriggerScreenblurFadeIn(200)
 end
 
 local function closeMenu()
     menuOpen = false
     SendNUIMessage({ action = 'menu', data = { open = false } })
     SetNuiFocus(false, false)
+    TriggerScreenblurFadeOut(200)
 end
 
 RegisterNUICallback('settings:update', function(data, cb)
