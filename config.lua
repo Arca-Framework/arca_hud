@@ -1,5 +1,6 @@
 HudConfig = {
     SpeedUnit = 'mph',          -- 'mph' or 'kmh'
+    SpeedoMax = { mph = 160, kmh = 260 },   -- speed at which the speedometer ring is full
     MinimapOnFoot = false,      -- show the minimap while walking
     ShowMoney = 'change',       -- 'always', 'change' (pops up when money changes) or 'never'
     ShowLocation = true,        -- street, area and compass

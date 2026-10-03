@@ -83,38 +83,56 @@ end
 ---------------------------------------------------------------------
 -- Main loop
 ---------------------------------------------------------------------
+-- One loop, but each part runs only as often as it needs to:
+--   vehicle: every tick (100ms in a car, so the speedo is smooth)
+--   status:  every 500ms
+--   location: every 1000ms (street lookups are the most expensive call)
+local STATUS_EVERY, LOCATION_EVERY = 500, 1000
+
 CreateThread(function()
+    local nextStatus, nextLocation = 0, 0
+    local radarShown
     while true do
         local show = HudSettings.visible and not HudSettings.cinematic and isLoggedIn() and not IsPauseMenuActive()
         send('visible', show)
+        local tick = 500
 
         if show then
+            local now = GetGameTimer()
             local ped = PlayerPedId()
-            local meta = PlayerData.metadata or {}
             local veh = GetVehiclePedIsIn(ped, false)
             local inVeh = veh ~= 0
+            tick = inVeh and 100 or 250
 
-            send('status', {
-                health = healthPercent(ped),
-                armor = GetPedArmour(ped),
-                hunger = math.floor(meta.hunger or 100),
-                thirst = math.floor(meta.thirst or 100),
-                stress = HudSettings.stress and math.floor(meta.stress or 0) or nil,
-                oxygen = IsPedSwimmingUnderWater(ped) and math.floor(GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10) or nil,
-                talking = NetworkIsPlayerTalking(PlayerId()),
-                voice = voiceMode(),
-                radio = LocalPlayer.state.radioChannel,
-            })
+            if now >= nextStatus then
+                nextStatus = now + STATUS_EVERY
+                local meta = PlayerData.metadata or {}
+                send('status', {
+                    health = healthPercent(ped),
+                    armor = GetPedArmour(ped),
+                    hunger = math.floor(meta.hunger or 100),
+                    thirst = math.floor(meta.thirst or 100),
+                    stress = HudSettings.stress and math.floor(meta.stress or 0) or nil,
+                    oxygen = IsPedSwimmingUnderWater(ped) and math.floor(GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10) or nil,
+                    talking = NetworkIsPlayerTalking(PlayerId()),
+                    voice = voiceMode(),
+                    radio = LocalPlayer.state.radioChannel,
+                })
+            end
 
-            DisplayRadar(inVeh or HudSettings.minimapOnFoot)
+            local wantRadar = inVeh or HudSettings.minimapOnFoot
+            if wantRadar ~= radarShown then
+                radarShown = wantRadar
+                DisplayRadar(wantRadar)
+            end
 
             if inVeh then
-                local mult = HudSettings.speedUnit == 'kmh' and 3.6 or 2.236936
+                local kmh = HudSettings.speedUnit == 'kmh'
                 send('vehicle', {
                     show = true,
-                    speed = math.floor(GetEntitySpeed(veh) * mult),
+                    speed = math.floor(GetEntitySpeed(veh) * (kmh and 3.6 or 2.236936)),
+                    max = kmh and HudConfig.SpeedoMax.kmh or HudConfig.SpeedoMax.mph,
                     unit = HudSettings.speedUnit,
-                    rpm = math.floor(GetVehicleCurrentRpm(veh) * 100),
                     gear = GetVehicleCurrentGear(veh),
                     fuel = fuelLevel(veh),
                     engine = math.floor(GetVehicleEngineHealth(veh) / 10),
@@ -125,7 +143,8 @@ CreateThread(function()
                 send('vehicle', { show = false, map = HudSettings.minimapOnFoot })
             end
 
-            if HudSettings.location then
+            if HudSettings.location and now >= nextLocation then
+                nextLocation = now + LOCATION_EVERY
                 local c = GetEntityCoords(ped)
                 local s1, s2 = GetStreetNameAtCoord(c.x, c.y, c.z)
                 send('location', {
@@ -135,11 +154,12 @@ CreateThread(function()
                     heading = heading(),
                 })
             end
-        elseif isLoggedIn() and (HudSettings.cinematic or not HudSettings.visible) then
+        elseif isLoggedIn() and (HudSettings.cinematic or not HudSettings.visible) and radarShown ~= false then
+            radarShown = false
             DisplayRadar(false)
         end
 
-        Wait(HudConfig.UpdateInterval)
+        Wait(tick)
     end
 end)
 

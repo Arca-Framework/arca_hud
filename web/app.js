@@ -66,9 +66,11 @@ function updateVehicle(d) {
 
     $('speed').textContent = d.speed;
     $('unit').textContent = d.unit === 'kmh' ? 'KM/H' : 'MPH';
-    const rpm = $('rpm');
-    rpm.style.strokeDashoffset = RPM_LEN - (RPM_LEN * Math.min(d.rpm, 100)) / 100;
-    rpm.classList.toggle('red', d.rpm >= 90);
+    // the ring follows speed (empty when stopped, full at SpeedoMax)
+    const pct = Math.max(0, Math.min(100, (d.speed / (d.max || 160)) * 100));
+    const ring = $('rpm');
+    ring.style.strokeDashoffset = RPM_LEN - (RPM_LEN * pct) / 100;
+    ring.classList.toggle('red', pct >= 90);
 
     $('gear').textContent = d.speed === 0 && d.gear <= 1 ? 'N' : d.gear === 0 ? 'R' : d.gear;
     const belt = $('belt');

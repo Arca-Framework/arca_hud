@@ -59,6 +59,12 @@ CreateThread(function()
     local nextAnchor = 0
 
     while true do
+        -- nothing to do while the radar is hidden (on foot): check again in a bit
+        if IsRadarHidden() then
+            Wait(250)
+            goto continue
+        end
+
         -- 3 = hide the health/armour bars under the radar
         BeginScaleformMovieMethod(minimap, 'SETUP_HEALTH_ARMOUR')
         ScaleformMovieMethodAddParamInt(3)
@@ -69,7 +75,7 @@ CreateThread(function()
 
         local now = GetGameTimer()
         if now >= nextAnchor then
-            nextAnchor = now + 500
+            nextAnchor = now + 2000
             local anchor = getMinimapAnchor()
             local key = ('%.4f:%.4f:%.4f:%.4f:%s:%d'):format(anchor.left, anchor.top, anchor.width, anchor.height, tostring(HudSettings.minimapFrame), HudSettings.minimapZoom)
             if key ~= lastAnchor then
@@ -80,5 +86,6 @@ CreateThread(function()
         end
 
         Wait(0)
+        ::continue::
     end
 end)
