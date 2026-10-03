@@ -28,12 +28,34 @@ local function hideHealthArmour()
     return minimap
 end
 
+local lastAnchor
+-- the page (re)loaded: send the radar frame again
+AddEventHandler('arca_hud:client:nuiReady', function() lastAnchor = nil end)
+
+---------------------------------------------------------------------
+-- Route colour (waypoint line + GPS) from config.lua
+---------------------------------------------------------------------
+-- 142-144 = HUD_COLOUR_WAYPOINT / _WAYPOINTLIGHT / _WAYPOINTDARK; GTA's default is purple
+local ROUTE_HUD_COLOURS = { 142, 143, 144 }
+local DEFAULT_ROUTE = { 164, 76, 242 }
+
+local function setRouteColour(rgb)
+    for _, id in ipairs(ROUTE_HUD_COLOURS) do
+        ReplaceHudColourWithRgba(id, rgb[1], rgb[2], rgb[3], 255)
+    end
+end
+
+if HudConfig.RouteColour then setRouteColour(HudConfig.RouteColour) end
+
+AddEventHandler('onResourceStop', function(resource)
+    if resource == GetCurrentResourceName() and HudConfig.RouteColour then setRouteColour(DEFAULT_ROUTE) end
+end)
+
 CreateThread(function()
     while not LocalPlayer.state.isLoggedIn do Wait(500) end
 
     local minimap = hideHealthArmour()
 
-    local lastAnchor
     local nextAnchor = 0
 
     while true do

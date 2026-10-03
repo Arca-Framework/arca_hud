@@ -104,3 +104,10 @@ CreateThread(function()
     Wait(250)
     SyncHudSettings()
 end)
+
+-- the NUI page finished loading (first start or resource restart): resend everything
+RegisterNUICallback('ready', function(_, cb)
+    cb(1)
+    SyncHudSettings()
+    TriggerEvent('arca_hud:client:nuiReady')
+end)

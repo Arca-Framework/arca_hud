@@ -237,3 +237,7 @@ window.addEventListener('message', ({ data }) => {
 if (location.search.includes('menu')) {
     window.postMessage({ action: 'menu', data: { open: true, settings: { visible: true, cinematic: false, scale: 100, speedUnit: 'mph', minimapOnFoot: false, minimapFrame: true, minimapZoom: 1100, location: true, stress: true, money: 'change', rings: { health: true, armor: true, hunger: true, thirst: true, stress: false, voice: true } } } });
 }
+
+// tell Lua the page is ready, so it (re)sends everything — after a resource restart the
+// first messages arrive before this page has loaded and would otherwise be lost
+post('ready');

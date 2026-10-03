@@ -6,6 +6,9 @@ HudConfig = {
     ShowStress = true,
     UpdateInterval = 200,       -- ms between HUD updates
 
+    -- colour of the waypoint / GPS route on the map and minimap, { r, g, b } (false = GTA's purple)
+    RouteColour = { 0, 255, 106 },
+
     Minimap = {
         Zoom = 1100,            -- radar zoom (0 = closest, 1400 = furthest)
         Style = 'frame',        -- 'frame' draws an Arca border around the radar, 'none' leaves it bare

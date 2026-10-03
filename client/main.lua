@@ -176,8 +176,9 @@ exports('ToggleHud', function(state)
     SyncHudSettings()
 end)
 
--- if the resource restarts mid-session
-CreateThread(function()
-    Wait(500)
+-- the page (re)loaded: forget what was sent so every value goes out again
+AddEventHandler('arca_hud:client:nuiReady', function()
+    last = {}
+    PlayerData = exports.arca_core:GetPlayerData() or PlayerData
     if isLoggedIn() then sendMoney() end
 end)
